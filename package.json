@@ -1,15 +1,19 @@
 {
   "name": "tsukedaicho-slack",
-  "module": "main.ts",
+  "module": "src/main.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun src/main.ts"
+    "serve": "bun src/main.ts",
+    "compile": "bun build src/main.ts --compile --outfile tsukedaicho-slack"
+  },
+  "dependencies": {
+    "@slack/bolt": "^3.18.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.7.3",
+    "@biomejs/biome": "^1.7.3",
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.4.5"
   }
 }
