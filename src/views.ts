@@ -48,15 +48,6 @@ export function home(
         },
         ...userAmountViews,
         {
-          type: "header",
-          text: {
-            type: "plain_text",
-            text: ":memo: 最近の履歴",
-            emoji: true,
-          },
-        },
-        ...recordViews,
-        {
           type: "actions",
           elements: [
             {
@@ -76,12 +67,21 @@ export function home(
               type: "button",
               text: {
                 type: "plain_text",
-                text: "精算する",
+                text: "立替/精算する",
               },
               action_id: Keys.CREATE_SETTLE_ACTION,
             },
           ],
         },
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: ":memo: 最近の履歴",
+            emoji: true,
+          },
+        },
+        ...recordViews,
       ],
     },
   };
@@ -94,7 +94,7 @@ export function create(
 ): ViewsOpenArguments {
   let label = "ツケる";
   if (mode === Keys.SETTLE) {
-    label = "精算する";
+    label = "立替/精算する";
   }
 
   const pad = (n: number, d: number) => `0000${n}`.slice(-d);
