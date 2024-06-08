@@ -1,15 +1,27 @@
-# tsukedaicho-slack
+# ツケ台帳 for Slack
 
-To install dependencies:
+## インストール
 
 ```bash
 bun install
 ```
 
-To run:
+## 環境変数の用意
 
-```bash
-bun run dev
+.env.local を作成する。
+
+```
+DATASTORE_API=<spreadsheet gas endpoint url>
+DATASTORE_TOKEN=<spreadsheet gas endpoint access token>
+SLACK_BOT_TOKEN=<slack bot token>
+SLACK_SIGNING_SECRET=<slack signing secret>
+SLACK_APP_TOKEN=<slack app token if you use socket mode>
 ```
 
-This project was created using `bun init` in bun v1.1.8. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+## 起動
+
+起動する
+
+```bash
+bun run serve
+```

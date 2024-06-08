@@ -7,6 +7,7 @@ import {
   type BlockAction,
   type ButtonAction,
 } from "@slack/bolt";
+import type { ViewsPublishArguments } from "@slack/web-api";
 
 const appOptions: AppOptions = {
   token: process.env.SLACK_BOT_TOKEN,
@@ -21,6 +22,23 @@ if (process.env.SLACK_APP_TOKEN) {
 
 const app = new App(appOptions);
 
+const renderHomeLoading = (userId: string): ViewsPublishArguments => ({
+  user_id: userId,
+  view: {
+    type: "home",
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "plain_text",
+          text: "NOW LOADING... :cd:",
+          emoji: true,
+        },
+      },
+    ],
+  },
+});
+
 const renderHome = async (userId: string) => {
   const data = await Promise.all([
     datastore.listUserAmount(),
@@ -31,6 +49,8 @@ const renderHome = async (userId: string) => {
 };
 
 app.event("app_home_opened", async ({ client, event, logger }) => {
+  await client.views.publish(renderHomeLoading(event.user));
+
   const view = await renderHome(event.user);
 
   const result = await client.views.publish(view);
@@ -69,11 +89,6 @@ app.view(Keys.EXEC_CREATE, async ({ ack, client, body, logger }) => {
   let amount = Number.parseInt(values.amount.amount.value ?? "0");
   const detail = values.detail.detail.value ?? "";
 
-  const profile = await client.users.info({
-    user: userId ?? "",
-  });
-  const name = profile.user?.profile?.display_name ?? "";
-
   if (Number.isNaN(amount) || amount <= 0) {
     await ack({
       response_action: "errors",
@@ -83,6 +98,15 @@ app.view(Keys.EXEC_CREATE, async ({ ack, client, body, logger }) => {
     });
     return;
   }
+
+  ack().then();
+
+  await client.views.publish(renderHomeLoading(body.user.id));
+
+  const profile = await client.users.info({
+    user: userId ?? "",
+  });
+  const name = profile.user?.profile?.display_name ?? "";
 
   if (mode === Keys.TSUKE) {
     amount *= -1;
@@ -95,15 +119,11 @@ app.view(Keys.EXEC_CREATE, async ({ ack, client, body, logger }) => {
     detail,
   });
 
-  setTimeout(async () => {
-    const view = await renderHome(body.user.id);
+  const view = await renderHome(body.user.id);
 
-    const result = await client.views.publish(view);
+  const result = await client.views.publish(view);
 
-    logger.debug(result);
-  }, 10);
-
-  await ack();
+  logger.debug(result);
 });
 
 app.action<BlockAction<ButtonAction>>(
@@ -118,19 +138,19 @@ app.action<BlockAction<ButtonAction>>(
 );
 
 app.view(Keys.EXEC_DELETE, async ({ ack, client, body, logger }) => {
+  ack().then();
+
+  await client.views.publish(renderHomeLoading(body.user.id));
+
   const recordId = body.view.private_metadata;
 
   await datastore.deleteRecord(recordId);
 
-  setTimeout(async () => {
-    const view = await renderHome(body.user.id);
+  const view = await renderHome(body.user.id);
 
-    const result = await client.views.publish(view);
+  const result = await client.views.publish(view);
 
-    logger.debug(result);
-  }, 10);
-
-  await ack();
+  logger.debug(result);
 });
 
 (async () => {
